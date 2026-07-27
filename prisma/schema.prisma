@@ -1,0 +1,200 @@
+// Esquema del sistema de gestión de proyectos — Reto Aztec.
+//
+// Dos ideas guían este modelo:
+//
+// 1. Los campos que vienen del dataset se guardan TAL CUAL, con sufijo `Source`
+//    cuando el sistema los recalcula (health, overdue). Nunca se sobrescribe la
+//    fuente: se conserva para poder auditar la diferencia.
+//
+// 2. El score, los flags y las colas NO se persisten. Se calculan en lectura
+//    desde `src/lib`. Así nunca quedan obsoletos, y cambiar un peso re-prioriza
+//    el portafolio entero sin migración.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+/// Persona del equipo. `inSourceTeamSheet` marca si aparecía en la pestaña
+/// `Team` del dataset: Andrea Molina es dueña de PRJ-19 y tiene 4 tareas, pero
+/// no está en esa pestaña. La capacidad del equipo venía mal contada en origen.
+model TeamMember {
+  id                String  @id @default(cuid())
+  alias             String  @unique
+  role              String
+  inSourceTeamSheet Boolean @default(true)
+
+  ownedProjects    Project[] @relation("ProjectOwner")
+  nextStepOwnerFor Project[] @relation("NextStepOwner")
+  assignedTasks    Task[]
+  escalationsOwned Blocker[] @relation("BlockerOwner")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id   String @id @default(cuid())
+  code String @unique
+  name String
+
+  clientAlias    String
+  engagementType String // Proyecto | Mantenimiento o recurrente | Diagnostico
+  projectTypeApi String // Automatizacion | Consultoria
+  stage          String // Ejecucion | Descubrimiento
+  status         String // Activo | Pausado | Cerrado   ← "estado" del enunciado
+
+  /// Salud declarada en el dataset. El sistema NO la usa para decidir: la
+  /// recalcula desde las tareas. Se guarda para mostrar la discrepancia — los
+  /// 4 Diagnósticos decían "En riesgo" teniendo tareas Bloqueadas.
+  healthSource String
+
+  ownerId String?
+  owner   TeamMember? @relation("ProjectOwner", fields: [ownerId], references: [id])
+
+  startDate  DateTime?
+  targetDate DateTime? // ← "fecha límite" del enunciado
+
+  businessValue    Float?
+  currency         String?
+  businessValueUsd Float? // normalizado en el seed con la tasa de config
+
+  summary         String?
+  recentCompleted String?
+
+  /// Conteos declarados en el dataset, solo para auditoría. El sistema cuenta
+  /// las tareas reales.
+  openTasksSource    Int?
+  overdueTasksSource Int?
+  blockersSource     String?
+
+  // ─── Campos que el enunciado exige y el dataset NO tiene ───
+
+  /// Siguiente paso. Si está vacío, el sistema deriva uno del grafo de
+  /// dependencias de las tareas (ver src/lib/graph.ts).
+  nextStep        String?
+  nextStepOwnerId String?
+  nextStepOwner   TeamMember? @relation("NextStepOwner", fields: [nextStepOwnerId], references: [id])
+  nextStepDueDate DateTime?
+
+  /// Prioridad manual: un override del score calculado que EXIGE razón escrita.
+  /// No se puede saltar el algoritmo sin decir por qué.
+  priorityOverride String? // Critica | Alta | Media | Baja
+  overrideReason   String?
+
+  archivedAt DateTime?
+
+  tasks    Task[]
+  blockers Blocker[]
+  notes    Note[]
+  activity ActivityLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([clientAlias])
+}
+
+model Task {
+  id        String  @id @default(cuid())
+  code      String  @unique
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  title  String
+  detail String?
+
+  assigneeId String?
+  assignee   TeamMember? @relation(fields: [assigneeId], references: [id])
+
+  priority String // Critica | Alta | Media | Baja
+  status   String // Por hacer | En progreso | En revision | Bloqueada | Hecha
+  dueDate  DateTime?
+
+  /// Flag `is_overdue` original del dataset. No se usa para decidir:
+  /// corresponde a un corte del ~13-jul-2026 y 4 tareas están mal marcadas
+  /// incluso a esa fecha. Se conserva para auditar.
+  isOverdueSource Boolean?
+
+  /// En el dataset, `dependency` era texto libre con el título de otra tarea
+  /// del mismo proyecto. El seed lo normaliza a esta relación real, que es lo
+  /// que permite calcular la tarea arrancable y detectar ciclos.
+  dependsOnTaskId String?
+  dependsOn       Task?   @relation("TaskDeps", fields: [dependsOnTaskId], references: [id])
+  dependents      Task[]  @relation("TaskDeps")
+
+  lastProgress String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([status])
+}
+
+/// Bloqueo explícito. El enunciado pide "guardar bloqueos" y un campo de texto
+/// no alcanza: la distinción EXTERNO/INTERNO es lo que enruta un proyecto a la
+/// cola ESCALAR o a EJECUTAR. Un bloqueo externo necesita dueño de escalación y
+/// fecha de respuesta; uno interno se trabaja.
+model Blocker {
+  id        String  @id @default(cuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  kind        String // EXTERNO | INTERNO
+  description String
+
+  ownerId String?
+  owner   TeamMember? @relation("BlockerOwner", fields: [ownerId], references: [id])
+
+  raisedAt   DateTime  @default(now())
+  dueBy      DateTime?
+  resolvedAt DateTime?
+
+  /// Código de la tarea que originó el bloqueo, cuando viene de una tarea.
+  sourceTaskCode String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+/// Notas del proyecto. Tabla y no campo de texto: interesa el historial con
+/// autor y fecha, no el último que sobrescribió.
+model Note {
+  id        String  @id @default(cuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  author String
+  body   String
+
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+}
+
+/// Trazabilidad: qué campo cambió, de qué valor a cuál, quién y por qué.
+/// Es lo que convierte "actualizar proyectos" en algo auditable.
+model ActivityLog {
+  id        String  @id @default(cuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  actor    String
+  action   String // CREATE | UPDATE | NOTE | OVERRIDE | BLOCKER
+  field    String?
+  oldValue String?
+  newValue String?
+  reason   String?
+
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+}
