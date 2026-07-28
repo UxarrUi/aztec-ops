@@ -58,16 +58,27 @@ export default async function Page({
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-extrabold text-brand">Torre de control</h1>
-        <p className="mt-1 max-w-3xl text-sm text-muted">
-          Priorizar no es ordenar una lista: es separar lo que se ejecuta, de lo que se
-          escala, de lo que hay que decidir. Todo lo de abajo está calculado a la fecha{" "}
-          <span className="tabular text-foreground">{asOfKey}</span>.
+      {/*
+        La tesis del sistema, como titular. Sigue la estructura de portada de
+        Aztec: rótulo pequeño, titular grande partido en dos frases, y bajada.
+      */}
+      <header className="max-w-4xl pt-2 pb-2">
+        <p className="text-xs font-semibold tracking-[0.12em] text-muted uppercase">
+          Torre de control · a la fecha <span className="tabular">{asOfKey}</span>
+        </p>
+        <h1 className="mt-3 text-3xl leading-[1.1] font-extrabold text-brand sm:text-[2.75rem]">
+          Priorizar no es ordenar una lista.
+        </h1>
+        <p className="mt-3 text-xl leading-snug font-bold text-foreground sm:text-2xl">
+          Es separar lo que se ejecuta, de lo que se escala, de lo que hay que decidir.
         </p>
       </header>
 
-      {/* La cifra que resume el problema del portafolio. */}
+      {/*
+        La cifra que justifica el titular. Antes llevaba una segunda línea
+        explicando por qué se separa por tipo de acción; el titular ya lo dice,
+        así que repetirlo aquí solo restaba fuerza al dato.
+      */}
       <Card className="border-transparent bg-cream px-6 py-5">
         <p className="text-base text-brand">
           De los <strong className="font-extrabold">10 proyectos más urgentes</strong>, solo{" "}
@@ -76,10 +87,6 @@ export default async function Page({
           {activeTop10.filter((p) => p.queue === "ESCALAR").length} dependen de un tercero
           y {activeTop10.filter((p) => p.queue === "DECIDIR").length} necesitan una
           decisión.
-        </p>
-        <p className="mt-1.5 text-sm text-muted">
-          Por eso el sistema separa por tipo de acción y no solo por urgencia: más horas de
-          trabajo no mueven la mayor parte de este portafolio.
         </p>
       </Card>
 
