@@ -1,9 +1,17 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
+import { useRouter } from "next/navigation";
 import type { ActionResult } from "@/lib/actions";
-import { addBlocker, addNote, createProject, setPriorityOverride, updateProject } from "@/lib/actions";
+import {
+  addBlocker,
+  addNote,
+  createProject,
+  resolveBlocker,
+  setPriorityOverride,
+  updateProject,
+} from "@/lib/actions";
 
 /**
  * Los formularios de escritura.
@@ -283,6 +291,48 @@ export function NoteForm({ code }: { code: string }) {
         <Feedback state={state} />
       </div>
     </form>
+  );
+}
+
+/**
+ * Cierra un bloqueo.
+ *
+ * Importa más de lo que parece: resolver el último bloqueo externo de un
+ * proyecto lo saca de la cola ESCALAR y lo devuelve a EJECUTAR. Es la operación
+ * que cierra el ciclo de vida completo — se registra un bloqueo, se escala, se
+ * resuelve, y el portafolio se reordena solo.
+ */
+export function ResolveBlockerButton({
+  code,
+  blockerId,
+}: {
+  code: string;
+  blockerId: string;
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  function resolve() {
+    startTransition(async () => {
+      const result = await resolveBlocker(code, blockerId);
+      if (!result.ok) setError(result.error);
+      else router.refresh();
+    });
+  }
+
+  return (
+    <span className="flex flex-col items-end gap-0.5">
+      <button
+        type="button"
+        onClick={resolve}
+        disabled={pending}
+        className="rounded-full border border-line px-2.5 py-1 text-[11px] font-medium text-brand transition-colors hover:bg-surface-2 disabled:opacity-50"
+      >
+        {pending ? "resolviendo…" : "resolver"}
+      </button>
+      {error && <span className="text-[11px] text-red-700">{error}</span>}
+    </span>
   );
 }
 

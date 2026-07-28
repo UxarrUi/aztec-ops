@@ -113,6 +113,7 @@ async function main() {
           description: blocker.description,
           ownerId: blocker.ownerAlias ? memberIds.get(blocker.ownerAlias) : null,
           dueBy: blocker.dueBy,
+          sourceTaskCode: blocker.sourceTaskCode,
         },
       });
       blockers++;

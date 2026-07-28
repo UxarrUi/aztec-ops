@@ -24,6 +24,7 @@ export function blocker(overrides: Partial<BlockerLike> = {}): BlockerLike {
   return {
     kind: "EXTERNO",
     description: "Waiting on client response",
+    sourceTaskCode: null,
     ownerAlias: null,
     dueBy: null,
     resolvedAt: null,

@@ -75,6 +75,7 @@ export function toProjectLike(row: ProjectRow): ProjectLike {
       ownerAlias: b.owner?.alias ?? null,
       dueBy: b.dueBy,
       resolvedAt: b.resolvedAt,
+      sourceTaskCode: b.sourceTaskCode,
     })),
   };
 }

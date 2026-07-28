@@ -155,6 +155,7 @@ export function loadDataset(dir: string = DATA_DIR): RawDataset {
       .map((t) => ({
         kind: classifyBlockerText(`${t.title} ${t.detail ?? ""}`),
         description: t.detail ?? t.title,
+        sourceTaskCode: t.code,
         ownerAlias: t.assigneeAlias,
         dueBy: t.dueDate,
         resolvedAt: null,

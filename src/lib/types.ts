@@ -52,6 +52,8 @@ export interface TaskLike {
 export interface BlockerLike {
   kind: BlockerKind;
   description: string;
+  /** Tarea que originó el bloqueo, cuando viene de una. */
+  sourceTaskCode: string | null;
   ownerAlias: string | null;
   dueBy: Date | null;
   resolvedAt: Date | null;

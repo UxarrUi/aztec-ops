@@ -9,6 +9,7 @@ import {
   NoteForm,
   OverrideForm,
   ProjectForm,
+  ResolveBlockerButton,
 } from "@/components/forms";
 import { NextStepDraft } from "@/components/ai";
 import { BreakDependencyButton, TaskStatusSelect } from "@/components/TaskControls";
@@ -64,6 +65,7 @@ export default async function Page({
   }));
 
   const openBlockers = blockers.filter((b) => b.resolvedAt === null);
+  const resolvedBlockers = blockers.filter((b) => b.resolvedAt !== null);
 
   return (
     <div className="space-y-5">
@@ -253,9 +255,30 @@ export default async function Page({
                         <p className="mt-0.5 text-xs text-muted">
                           {blocker.owner?.alias ?? "sin dueño de escalación"}
                           {blocker.dueBy && ` · respuesta esperada ${formatDate(blocker.dueBy)}`}
+                          {blocker.sourceTaskCode && (
+                            <>
+                              {" · viene de "}
+                              <span className="font-mono">{blocker.sourceTaskCode}</span>
+                            </>
+                          )}
                         </p>
                       </div>
+                      <ResolveBlockerButton code={project.code} blockerId={blocker.id} />
                     </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* Los resueltos se quedan a la vista: el rastro es la mitad del valor. */}
+            {resolvedBlockers.length > 0 && (
+              <ul className="divide-y divide-line border-t border-line">
+                {resolvedBlockers.map((blocker) => (
+                  <li key={blocker.id} className="px-4 py-2 text-xs text-muted">
+                    <span className="line-through">{blocker.description}</span>
+                    <span className="ml-1.5 whitespace-nowrap">
+                      · resuelto {formatDate(blocker.resolvedAt)}
+                    </span>
                   </li>
                 ))}
               </ul>
