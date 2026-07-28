@@ -26,18 +26,19 @@ Aztec entregó un dataset con **22 proyectos, 82 tareas y 5 personas** (pestaña
 
 Al analizar los datos aparece una sola cosa, y es grave:
 
-| Salud declarada | Proyectos |
-|---|---|
-| Bloqueado | 13 |
-| En riesgo | 4 |
-| Sano | 5 |
+| Salud | Declarada en el dataset | Recalculada por el sistema |
+|---|---|---|
+| Bloqueado | 13 | **17** |
+| En riesgo | 4 | 1 |
+| Sano | 5 | **4** |
 
-**19 de 22 proyectos están en rojo.** Y de los 5 "sanos", uno (PRJ-21) lleva
-cinco meses sin una sola tarea abierta.
+**18 de 22 proyectos están en rojo** una vez que la salud se calcula desde las
+tareas en lugar de creerle al campo declarado. Y de los 5 que la fuente daba por
+sanos, uno (PRJ-21) lleva cinco meses sin una sola tarea abierta.
 
 Esto tiene una consecuencia directa sobre el diseño: **un tablero que solo ordene
 proyectos de más a menos urgente no sirve para nada.** Si abres la aplicación un
-lunes y ves 19 proyectos en rojo ordenados por urgencia, sigues sin saber qué
+lunes y ves 18 proyectos en rojo ordenados por urgencia, sigues sin saber qué
 hacer. Has cambiado una hoja de cálculo por otra.
 
 ### La tesis del sistema
@@ -140,9 +141,17 @@ Cada proyecto cae en **una sola** cola:
 
 | Cola | Condición | Significado operativo |
 |---|---|---|
-| **EJECUTAR** | Tiene tarea arrancable y su bloqueo, si lo hay, es **interno** | El equipo trabaja esto hoy. Ordenado por score |
+| **DECIDIR** | Ciclo de dependencias, zombie, sin siguiente paso, duplicado probable o sin fecha límite | Requiere una decisión humana antes de poder priorizarse |
 | **ESCALAR** | Bloqueado por dependencia **externa**: cliente, credenciales, API, permisos | No se trabaja, se escala. Necesita dueño de escalación y fecha de respuesta |
-| **DECIDIR** | Sin siguiente paso, sin fecha límite, con ciclo, zombie o duplicado | Requiere una decisión humana antes de poder priorizarse |
+| **EJECUTAR** | Tiene tarea arrancable y su bloqueo, si lo hay, es **interno** | El equipo trabaja esto hoy. Ordenado por score |
+
+**El orden de evaluación importa: DECIDIR gana sobre ESCALAR.** Un proyecto con
+una dependencia circular o con un duplicado sin confirmar no debe escalarse
+todavía — llamar al cliente antes de haber decidido internamente qué pedirle es
+quemar la llamada. Por eso PRJ-08 y PRJ-22, que son los dos proyectos más caros
+del portafolio y están bloqueados por el cliente, **no** van a ESCALAR: primero
+hay que confirmar si son el mismo trabajo, porque llamar dos veces al mismo
+cliente por lo mismo cuesta la relación.
 
 **El detalle que hace creíble esta división: sale del dataset, no de una opinión.**
 Las tareas bloqueadas traen escrita su causa en el campo `detail`:
@@ -153,8 +162,11 @@ Las tareas bloqueadas traen escrita su causa en el campo `detail`:
 | `Blocked by permissions, repository access or owner confirmation` | EXTERNO | ESCALAR |
 | `A recurrent technical or operational dependency is hurting stability...` | INTERNO | EJECUTAR |
 
-Por eso PRJ-03, PRJ-05 y PRJ-06 quedan en EJECUTAR pese a estar bloqueados:
-**su bloqueo es nuestro y lo podemos romper.**
+De los 17 bloqueos del dataset, 13 son externos y 4 internos. Por eso PRJ-03,
+PRJ-05 y PRJ-06 quedan en EJECUTAR pese a estar bloqueados: **su bloqueo es
+nuestro y lo podemos romper.**
+
+Resultado sobre el portafolio activo: **7 EJECUTAR · 6 ESCALAR · 9 DECIDIR**.
 
 ### 4.3 El grafo de tareas — de dónde sale el "siguiente paso"
 
@@ -193,11 +205,17 @@ PERSONA_FANTASMA      owner ausente de la tabla de equipo        → Andrea Moli
 ### 4.5 Dos decisiones que hay que explicar
 
 **a) La fecha de corte es configurable.**
-El dataset es un snapshot del ~13-jul-2026. Con la fecha real de hoy, 13 de 22
-proyectos salen vencidos y el tablero pierde toda señal. El sistema calcula todo
-contra una **fecha de corte configurable** (`AS_OF_DATE`), con default en la
-fecha del snapshot y un selector en la interfaz. Mover esa fecha recalcula el
-portafolio entero.
+El dataset es un snapshot del ~13-jul-2026: el flag `is_overdue` que trae
+coincide con `due_date < 2026-07-13` en 78 de 82 tareas. Todas las fechas de
+tarea son de julio, así que al alejarse de esa fecha el backlog entero cae en
+mora — a 27-jul hay 68 tareas vencidas en vez de 38, y **13 proyectos saturan el
+factor de riesgo en 1.00**, con lo que ese factor deja de distinguir entre ellos.
+
+Por eso el sistema calcula todo contra una **fecha de corte configurable**
+(`AS_OF_DATE`), con default en la fecha del snapshot y un selector en la
+interfaz. No es para que la demo se vea bien: es reconocer que un portafolio
+siempre se analiza *a una fecha*. Mover el selector recalcula urgencia,
+vencimientos, salud y el orden entero.
 
 **b) La prioridad manual es un override auditado.**
 El reto pide "guardar prioridad". El score es calculado; la prioridad manual
@@ -208,63 +226,73 @@ de actividad. No se puede saltar el algoritmo sin decir por qué.
 
 ## 5. El modelo, ya calculado sobre los 22 proyectos reales
 
-Esto no es una proyección: es la salida del motor con fecha de corte 2026-07-13.
+Esto no es una proyección: es la salida literal de `npm run ranking`, con fecha
+de corte 2026-07-13.
 
 ```
- #  CODE    COLA      SCORE   URG   RSK   VAL   OWNER            VENC BLQ       USD   FLAGS
-──────────────────────────────────────────────────────────────────────────────────────────────
- 1  PRJ-22  ESCALAR    94.8  1.00  0.85  1.00  Camila Torres       2   1    38,000
- 2  PRJ-08  ESCALAR    93.5  1.00  0.85  0.95  Camila Torres       2   1    35,000
- 3  PRJ-04  DECIDIR    88.5  1.00  0.85  0.75  Camila Torres       2   1    25,000   CICLO
- 4  PRJ-09  ESCALAR    87.2  1.00  0.85  0.70  Camila Torres       2   1    22,000
- 5  PRJ-06  EJECUTAR   85.2  1.00  0.65  0.90  Laura Gomez         2   1    30,000
- 6  PRJ-10  ESCALAR    83.5  1.00  0.85  0.55  Camila Torres       2   1    18,000
- 7  PRJ-07  ESCALAR    82.2  1.00  0.85  0.50  Camila Torres       2   1       s/d   DATOS
- 8  PRJ-13  ESCALAR    81.1  1.00  0.93  0.35  Santiago Vera       3   1    12,000
- 9  PRJ-11  ESCALAR    81.0  1.00  0.85  0.45  Laura Gomez         2   1    15,000
-10  PRJ-12  ESCALAR    76.0  1.00  0.85  0.25  Mateo Ruiz          2   1     9,000
-11  PRJ-03  EJECUTAR   72.8  1.00  0.65  0.40  Camila Torres       2   1    14,000
-12  PRJ-01  DECIDIR    69.8  0.50  0.85  0.80  Daniel Rojas        2   1    28,000   DATOS
-13  PRJ-05  EJECUTAR   66.5  1.00  0.65  0.15  Laura Gomez         2   1     3,000
-14  PRJ-21  DECIDIR    63.0  1.00  0.30  0.50  Santiago Vera       0   0    16,000   SIN_PASO, ZOMBIE
-15  PRJ-14  DECIDIR    54.9  0.50  0.93  0.10  Mateo Ruiz          3   1     2,000   DATOS
-16  PRJ-15  DECIDIR    52.4  0.50  0.93  0.00  Laura Gomez         3   1     1,000   DATOS
-17  PRJ-16  DECIDIR    52.4  0.50  0.93  0.00  Mateo Ruiz          3   1     1,000   DATOS
-18  PRJ-02  DECIDIR    47.8  0.50  0.65  0.20  Daniel Rojas        2   1     8,000   DATOS
-19  PRJ-20  EJECUTAR   27.2  0.15  0.00  0.85  Laura Gomez         0   0    29,268
-20  PRJ-18  EJECUTAR   22.2  0.15  0.00  0.65  Mateo Ruiz          0   0    20,732
-21  PRJ-19  EJECUTAR   21.0  0.15  0.00  0.60  Andrea Molina       0   0    19,000
-22  PRJ-17  EJECUTAR   19.5  0.30  0.00  0.30  Daniel Rojas        0   0    11,000
+ #  CODE     COLA      SCORE   URG   RSK   VAL   RESPONSABLE       VENC BLQ       USD   SEÑALES
+──────────────────────────────────────────────────────────────────────────────────────────────────
+ 1  PRJ-22   DECIDIR    94.8  1.00  0.85  1.00  Camila Torres       2   1    38,000  DUPLICADO, DATOS
+ 2  PRJ-08   DECIDIR    93.5  1.00  0.85  0.95  Camila Torres       2   1    35,000  DUPLICADO, DATOS
+ 3  PRJ-04   DECIDIR    88.5  1.00  0.85  0.75  Camila Torres       2   1    25,000  CICLO
+ 4  PRJ-09   ESCALAR    87.3  1.00  0.85  0.70  Camila Torres       2   1    22,000  DATOS
+ 5  PRJ-06   EJECUTAR   85.3  1.00  0.65  0.90  Laura Gomez         2   1    30,000
+ 6  PRJ-10   ESCALAR    83.5  1.00  0.85  0.55  Camila Torres       2   1    18,000  DATOS
+ 7  PRJ-07   ESCALAR    82.3  1.00  0.85  0.50  Camila Torres       2   1       s/d  DATOS
+ 8  PRJ-13   ESCALAR    81.1  1.00  0.93  0.35  Santiago Vera       3   1    12,000  DATOS
+ 9  PRJ-11   ESCALAR    81.0  1.00  0.85  0.45  Laura Gomez         2   1    15,000  DATOS
+10  PRJ-12   ESCALAR    76.0  1.00  0.85  0.25  Mateo Ruiz          2   1     9,000  DATOS
+11  PRJ-03   EJECUTAR   72.8  1.00  0.65  0.40  Camila Torres       2   1    14,000
+12  PRJ-01   DECIDIR    69.8  0.50  0.85  0.80  Daniel Rojas        2   1    28,000  DATOS
+13  PRJ-05   EJECUTAR   66.5  1.00  0.65  0.15  Laura Gomez         2   1     3,000
+14  PRJ-21   DECIDIR    63.0  1.00  0.30  0.50  Santiago Vera       0   0    16,000  SIN_PASO, ZOMBIE
+15  PRJ-14   DECIDIR    54.9  0.50  0.93  0.10  Mateo Ruiz          3   1     2,000  DATOS
+16  PRJ-15   DECIDIR    52.4  0.50  0.93  0.00  Laura Gomez         3   1     1,000  DATOS
+17  PRJ-16   DECIDIR    52.4  0.50  0.93  0.00  Mateo Ruiz          3   1     1,000  DATOS
+18  PRJ-02   DECIDIR    47.8  0.50  0.65  0.20  Daniel Rojas        2   1     8,000  DATOS
+19  PRJ-20   EJECUTAR   27.3  0.15  0.00  0.85  Laura Gomez         0   0    29,268
+20  PRJ-18   EJECUTAR   22.3  0.15  0.00  0.65  Mateo Ruiz          0   0    20,732
+21  PRJ-19   EJECUTAR   21.0  0.15  0.00  0.60  Andrea Molina       0   0    19,000  FANTASMA
+22  PRJ-17   EJECUTAR   19.5  0.30  0.00  0.30  Daniel Rojas        0   0    11,000
 
-COLAS:  ESCALAR 8  ·  DECIDIR 7  ·  EJECUTAR 7
+COLAS:  EJECUTAR 7  ·  ESCALAR 6  ·  DECIDIR 9
+SALUD:  Bloqueado 17  ·  En riesgo 1  ·  Sano 4
 CARGA:  Camila 28 · Laura 19 · Mateo 16 · Daniel 11 · Santiago 4 · Andrea 4   (P80 = 19)
 ```
 
 ### Lo que este resultado demuestra
 
-1. **La separación funciona.** Los proyectos sanos (PRJ-17 a PRJ-20) quedan entre
-   19 y 27 puntos, muy por debajo de los bloqueados (76–95). El score separa
-   señal de ruido sin que nadie lo empuje a mano.
+1. **De los 10 proyectos más urgentes, solo UNO se puede trabajar hoy.** Seis
+   dependen de un tercero y tres necesitan una decisión. Es decir: **el equipo no
+   puede resolver su propia lista de prioridades con más horas de trabajo.** Ese
+   es el hallazgo operativo más fuerte del ejercicio, y solo aparece cuando
+   separas por tipo de acción en lugar de ordenar una sola lista.
 
-2. **8 de los 10 proyectos más urgentes van a ESCALAR, no a EJECUTAR.** Es decir:
-   **el equipo no puede resolver su propia lista de prioridades con más horas de
-   trabajo.** Necesita que alguien levante el teléfono. Es el hallazgo operativo
-   más fuerte del ejercicio, y solo aparece cuando separas las colas.
+2. **La separación funciona sin que nadie la empuje.** Los cuatro proyectos sanos
+   (PRJ-17 a PRJ-20) quedan entre 19 y 27 puntos, muy por debajo de los
+   bloqueados (48–95). El score separa señal de ruido por sí solo.
 
-3. **6 de los 11 proyectos más urgentes son de Camila Torres.** El cuello de
+3. **6 de los 10 proyectos más urgentes son de Camila Torres.** El cuello de
    botella no es una opinión sobre el reparto de carga: es el ranking mismo.
 
 4. **La cola EJECUTAR queda con 7 proyectos entre 6 personas.** Eso sí es un lunes
-   ejecutable. Comparado con "19 proyectos en rojo", es la diferencia entre un
+   ejecutable. Comparado con "18 proyectos en rojo", es la diferencia entre un
    tablero y un sistema.
 
-5. **PRJ-04 aparece #3 y va a DECIDIR, no a ESCALAR.** Con 25.000 USD y todo
-   vencido, el instinto diría "escalar ya". Pero tiene una dependencia circular:
-   dos de sus tareas no pueden arrancar nunca. Escalarlo con el cliente antes de
-   romper el ciclo sería quemar la llamada.
+5. **Los tres proyectos del podio van a DECIDIR, no a ESCALAR.** Son los tres más
+   caros y están todos vencidos y bloqueados por el cliente — el instinto diría
+   "escalar ya". Pero dos son posiblemente el mismo trabajo contado dos veces, y
+   el tercero tiene una dependencia circular que hace que dos de sus tareas no
+   puedan arrancar nunca. En los tres casos hay que decidir algo internamente
+   antes de descolgar el teléfono.
 
 6. **Andrea Molina aparece en el ranking pero no en la tabla de equipo.** Es dueña
    de PRJ-19 con 4 tareas, y la hoja `Team` solo lista 5 personas.
+
+7. **La fecha de corte no es cosmética.** A 2026-07-27 hay 68 tareas vencidas en
+   vez de 38, y 13 proyectos saturan el factor de riesgo en 1.00 — el factor deja
+   de distinguir entre ellos. Analizar un portafolio siempre es analizarlo *a una
+   fecha*, y el sistema lo hace explícito en vez de esconderlo.
 
 ---
 

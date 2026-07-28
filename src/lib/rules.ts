@@ -1,11 +1,5 @@
 import { EXTERNAL_BLOCKER_PATTERNS, RISK } from "./config";
-import {
-  deriveNextStep,
-  findCycles,
-  getStartableTasks,
-  isTaskOpen,
-  isTaskOverdue,
-} from "./graph";
+import { deriveNextStep, findCycles, isTaskOpen, isTaskOverdue } from "./graph";
 import type {
   BlockerKind,
   BlockerLike,
@@ -135,7 +129,6 @@ export function computeFlags(project: ProjectLike, ctx: RuleContext): Flag[] {
   const overdue = overdueTasks(project, ctx.asOf);
   const externalBlockers = openExternalBlockers(project);
   const cycles = findCycles(project.tasks);
-  const startable = getStartableTasks(project.tasks);
   const health = computeHealth(project, ctx);
   const isActive = project.status === "Activo";
   const targetPassed =

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { loadDataset, parseDate, toUsd } from "@/lib/dataset";
 import { parseCsvToObjects } from "@/lib/csv";
@@ -74,9 +75,7 @@ describe("loadDataset sobre el dataset real", () => {
   });
 
   it("no deja dependencias sin resolver: toda `dependency` no vacía se convirtió", () => {
-    const rawTasks = parseCsvToObjects(
-      require("node:fs").readFileSync("data/tasks.csv", "utf8"),
-    );
+    const rawTasks = parseCsvToObjects(readFileSync("data/tasks.csv", "utf8"));
     const rawWithDependency = rawTasks.filter((r) => r.dependency.trim().length > 0);
     const resolved = projects.flatMap((p) => p.tasks.filter((t) => t.dependsOnCode));
 

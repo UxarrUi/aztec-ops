@@ -47,6 +47,10 @@ next-env.d.ts
 *.db
 *.db-journal
 
+# material de grabación del video — no se publica
+GUION-VIDEO.md
+GUION_VIDEO.md
+
 # skills que instala el CLI de Prisma — no son parte del proyecto
 /.agents
 /.windsurf
