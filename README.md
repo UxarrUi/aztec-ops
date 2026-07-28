@@ -116,6 +116,19 @@ interfaz ni la base de datos.
 Así nunca quedan obsoletos, y cambiar un peso re-prioriza el portafolio entero
 sin migración.
 
+### El sistema visual
+
+La paleta y la tipografía salen del CSS del sitio de Aztec, no de una
+aproximación a ojo: fondo `#f9f9f7`, verde de marca `#0d3326`, acento `#6edd62`,
+crema `#fbf2ec`, Plus Jakarta Sans, píldoras y tarjetas redondeadas. Todo vive en
+`src/app/globals.css`.
+
+Una decisión propia sobre esa base: **el verde de acento de Aztec es casi el
+mismo verde que esta herramienta usa para "sano"**. Para que el color siga
+significando una sola cosa, el acento brillante queda reservado al *estado* y lo
+interactivo usa el verde oscuro de marca. En una herramienta de operación el
+color es información, no decoración.
+
 ### La IA redacta, no decide
 
 El único componente con un modelo detrás está acotado a redacción:

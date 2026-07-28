@@ -31,7 +31,7 @@ export function AsOfPicker({ value }: { value: string }) {
         type="date"
         value={value}
         onChange={(e) => update(e.target.value)}
-        className="tabular rounded border border-line bg-surface-2 px-2 py-1 text-foreground"
+        className="tabular rounded-full border border-line bg-surface px-3 py-1.5 text-foreground focus:border-brand focus:outline-none"
       />
       {pending && <span className="text-[11px]">recalculando…</span>}
     </label>

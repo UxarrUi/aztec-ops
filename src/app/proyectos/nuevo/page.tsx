@@ -26,7 +26,7 @@ export default async function Page({
       </nav>
 
       <header>
-        <h1 className="text-lg font-semibold">Nuevo proyecto</h1>
+        <h1 className="text-2xl font-extrabold text-brand">Nuevo proyecto</h1>
         <p className="mt-1 text-sm text-muted">
           Lo único obligatorio es el nombre y el cliente. Si no le pones fecha límite ni
           siguiente paso, el proyecto nace en la cola <strong>Decidir</strong> — que es

@@ -18,10 +18,10 @@ function SourceTag({ source, note }: { source: AiResponse["source"]; note?: stri
   return (
     <span
       title={note ? `Se usó la plantilla: ${note}` : undefined}
-      className={`inline-flex items-center rounded px-1.5 py-0.5 text-[11px] ring-1 ring-inset ${
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${
         isModel
-          ? "bg-violet-500/15 text-violet-300 ring-violet-500/30"
-          : "bg-slate-500/15 text-slate-300 ring-slate-500/30"
+          ? "bg-violet-50 text-violet-800 ring-violet-200"
+          : "bg-slate-100 text-slate-600 ring-slate-200"
       }`}
     >
       {isModel ? "redactado por el modelo" : "plantilla determinista"}
@@ -30,7 +30,7 @@ function SourceTag({ source, note }: { source: AiResponse["source"]; note?: stri
 }
 
 const button =
-  "rounded bg-violet-500/20 px-3 py-1.5 text-sm text-violet-200 ring-1 ring-inset ring-violet-500/30 transition-colors hover:bg-violet-500/30 disabled:opacity-50";
+  "rounded-full border border-line bg-surface px-4 py-2 text-sm font-semibold text-brand transition-colors hover:bg-surface-2 disabled:opacity-50";
 
 export function NextStepDraft({ code, asOf }: { code: string; asOf: string }) {
   const [result, setResult] = useState<AiResponse | null>(null);
@@ -66,7 +66,7 @@ export function NextStepDraft({ code, asOf }: { code: string; asOf: string }) {
         {loading ? "Redactando…" : "Proponer redacción"}
       </button>
 
-      {error && <p className="text-xs text-red-300">{error}</p>}
+      {error && <p className="text-xs text-red-700">{error}</p>}
 
       {result && (
         <div className="space-y-1.5 rounded border border-line bg-surface-2 px-3 py-2">
@@ -117,7 +117,7 @@ export function ExecutiveSummary({ asOf }: { asOf: string }) {
         {loading ? "Redactando…" : "Generar resumen del comité"}
       </button>
 
-      {error && <p className="text-xs text-red-300">{error}</p>}
+      {error && <p className="text-xs text-red-700">{error}</p>}
 
       {result && (
         <div className="space-y-2 rounded border border-line bg-surface-2 px-3 py-2">

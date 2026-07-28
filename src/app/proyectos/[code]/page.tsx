@@ -76,7 +76,7 @@ export default async function Page({
 
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold">{project.name}</h1>
+          <h1 className="text-2xl font-extrabold text-brand">{project.name}</h1>
           <p className="mt-1 text-sm text-muted">
             {project.clientAlias} · {project.engagementType} · {project.projectTypeApi} ·
             etapa {project.stage}
@@ -187,17 +187,17 @@ export default async function Page({
                         </div>
                         <div className="flex shrink-0 flex-col items-end gap-1">
                           {startable && (
-                            <Chip className="bg-emerald-500/15 text-emerald-300 ring-emerald-500/30">
+                            <Chip className="bg-accent-soft text-accent-ink ring-accent-ring">
                               arrancable
                             </Chip>
                           )}
                           {inCycle && (
-                            <Chip className="bg-violet-500/15 text-violet-300 ring-violet-500/30">
+                            <Chip className="bg-violet-50 text-violet-800 ring-violet-200">
                               en ciclo
                             </Chip>
                           )}
                           {overdue && (
-                            <Chip className="bg-amber-500/15 text-amber-300 ring-amber-500/30">
+                            <Chip className="bg-amber-50 text-amber-800 ring-amber-200">
                               vencida
                             </Chip>
                           )}
@@ -209,7 +209,7 @@ export default async function Page({
               </ul>
             )}
             {analyzed.cycles.length > 0 && (
-              <p className="border-t border-line px-4 py-2.5 text-xs text-violet-300">
+              <p className="border-t border-line px-4 py-2.5 text-xs text-violet-700">
                 Dependencia circular: {analyzed.cycles[0].join(" → ")} →{" "}
                 {analyzed.cycles[0][0]}. Esas tareas no pueden arrancar mientras el ciclo
                 exista.
@@ -232,8 +232,8 @@ export default async function Page({
                       <Chip
                         className={
                           blocker.kind === "EXTERNO"
-                            ? "bg-amber-500/15 text-amber-300 ring-amber-500/30"
-                            : "bg-sky-500/15 text-sky-300 ring-sky-500/30"
+                            ? "bg-amber-50 text-amber-800 ring-amber-200"
+                            : "bg-sky-50 text-sky-800 ring-sky-200"
                         }
                       >
                         {blocker.kind}
@@ -327,7 +327,7 @@ export default async function Page({
               <Row label="Salud declarada en la fuente">
                 {project.healthSource}
                 {project.healthSource !== analyzed.health && (
-                  <span className="ml-1 text-xs text-amber-300">
+                  <span className="ml-1 text-xs text-amber-700">
                     (recalculada: {analyzed.health})
                   </span>
                 )}
@@ -417,9 +417,9 @@ function Factor({
           {factor.value.toFixed(2)} → {factor.points.toFixed(1)} pts
         </span>
       </div>
-      <div className="mt-1 h-1.5 overflow-hidden rounded bg-surface-2">
+      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-2">
         <div
-          className="h-full rounded bg-sky-500"
+          className="h-full rounded-full bg-brand"
           style={{ width: `${Math.min(100, factor.value * 100)}%` }}
         />
       </div>

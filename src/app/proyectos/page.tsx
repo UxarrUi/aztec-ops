@@ -77,7 +77,7 @@ export default async function Page({
     <div className="space-y-4">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <h1 className="text-lg font-semibold">Proyectos</h1>
+          <h1 className="text-2xl font-extrabold text-brand">Proyectos</h1>
           <p className="mt-1 text-sm text-muted">
             {rows.length} de {portfolio.projects.length} proyectos · ordenados por score a
             la fecha <span className="tabular">{asOfKey}</span>
@@ -183,7 +183,7 @@ function Row({
   const rank = portfolio.projects.indexOf(item) + 1;
 
   return (
-    <tr className="align-top transition-colors hover:bg-surface-2/50">
+    <tr className="align-top transition-colors hover:bg-surface-2">
       <td className="tabular px-3 py-2.5 text-xs text-muted">{rank}</td>
       <td className="px-3 py-2.5">
         <ProjectLink code={item.project.code} name={item.project.name} asOf={asOf} />
@@ -219,7 +219,7 @@ function Row({
             )}
           </>
         ) : (
-          <span className="text-violet-300">sin definir</span>
+          <span className="text-violet-700">sin definir</span>
         )}
       </td>
       <td className="tabular px-3 py-2.5 text-right text-xs">
@@ -265,7 +265,7 @@ function FilterPill({
       href={href}
       className={`rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors ${
         active
-          ? "bg-sky-500/20 text-sky-200 ring-sky-500/40"
+          ? "bg-brand text-white ring-brand"
           : "text-muted ring-line hover:text-foreground"
       }`}
     >
@@ -296,7 +296,7 @@ function FilterSelect({
         {label}
         <span
           className={`rounded px-2 py-0.5 ring-1 ring-inset ${
-            value ? "bg-sky-500/20 text-sky-200 ring-sky-500/40" : "ring-line"
+            value ? "bg-brand text-white ring-brand" : "ring-line"
           }`}
         >
           {value || "todos"}
@@ -314,7 +314,7 @@ function FilterSelect({
             key={option}
             href={hrefFor(option)}
             className={`block rounded px-2 py-1 text-xs hover:bg-surface-2 ${
-              option === value ? "text-sky-200" : ""
+              option === value ? "text-brand" : ""
             }`}
           >
             {option}

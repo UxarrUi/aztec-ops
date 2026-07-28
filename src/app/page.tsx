@@ -59,7 +59,7 @@ export default async function Page({
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-lg font-semibold">Torre de control</h1>
+        <h1 className="text-2xl font-extrabold text-brand">Torre de control</h1>
         <p className="mt-1 max-w-3xl text-sm text-muted">
           Priorizar no es ordenar una lista: es separar lo que se ejecuta, de lo que se
           escala, de lo que hay que decidir. Todo lo de abajo está calculado a la fecha{" "}
@@ -68,16 +68,16 @@ export default async function Page({
       </header>
 
       {/* La cifra que resume el problema del portafolio. */}
-      <Card className="border-amber-500/25 bg-amber-500/5 px-4 py-3">
-        <p className="text-sm">
-          De los <strong>10 proyectos más urgentes</strong>, solo{" "}
-          <strong className="text-emerald-300">{workable}</strong>{" "}
+      <Card className="border-transparent bg-cream px-6 py-5">
+        <p className="text-base text-brand">
+          De los <strong className="font-extrabold">10 proyectos más urgentes</strong>, solo{" "}
+          <strong className="font-extrabold">{workable}</strong>{" "}
           {workable === 1 ? "se puede trabajar" : "se pueden trabajar"} hoy.{" "}
           {activeTop10.filter((p) => p.queue === "ESCALAR").length} dependen de un tercero
           y {activeTop10.filter((p) => p.queue === "DECIDIR").length} necesitan una
           decisión.
         </p>
-        <p className="mt-1 text-xs text-muted">
+        <p className="mt-1.5 text-sm text-muted">
           Por eso el sistema separa por tipo de acción y no solo por urgencia: más horas de
           trabajo no mueven la mayor parte de este portafolio.
         </p>
@@ -88,20 +88,20 @@ export default async function Page({
         <Stat
           label="Bloqueados"
           value={totals.blocked}
-          tone="text-red-300"
+          tone="text-red-700"
           hint="salud recalculada"
         />
-        <Stat label="En riesgo" value={totals.atRisk} tone="text-amber-300" />
+        <Stat label="En riesgo" value={totals.atRisk} tone="text-amber-700" />
         <Stat
           label="Tareas vencidas"
           value={totals.overdueTasks}
-          tone="text-amber-300"
+          tone="text-amber-700"
           hint={`de ${totals.openTasks} abiertas`}
         />
         <Stat
           label="Sin siguiente paso"
           value={totals.withoutNextStep}
-          tone={totals.withoutNextStep > 0 ? "text-violet-300" : ""}
+          tone={totals.withoutNextStep > 0 ? "text-violet-700" : ""}
         />
         <Stat
           label="Valor en juego"
@@ -167,7 +167,7 @@ export default async function Page({
           <div className="space-y-3 px-4 py-3">
             {overloaded.length > 0 && (
               <p className="text-sm">
-                <strong className="text-amber-300">
+                <strong className="text-amber-700">
                   {overloaded.map((m) => m.alias).join(", ")}
                 </strong>{" "}
                 {overloaded.length === 1 ? "está" : "están"} por encima del umbral de carga
@@ -176,7 +176,7 @@ export default async function Page({
             )}
             {ghosts.length > 0 && (
               <p className="text-sm">
-                <strong className="text-violet-300">
+                <strong className="text-violet-700">
                   {ghosts.map((m) => m.alias).join(", ")}
                 </strong>{" "}
                 {ghosts.length === 1 ? "tiene" : "tienen"} trabajo asignado pero no{" "}
@@ -191,7 +191,7 @@ export default async function Page({
                   <span className="h-1.5 flex-1 overflow-hidden rounded bg-surface-2">
                     <span
                       className={`block h-full rounded ${
-                        member.isOverloaded ? "bg-amber-400" : "bg-sky-500"
+                        member.isOverloaded ? "bg-amber-500" : "bg-brand"
                       }`}
                       style={{ width: `${(member.openTasks / maxLoad) * 100}%` }}
                     />
@@ -221,11 +221,12 @@ function QueueColumn({
   const style = QUEUE_STYLES[queue];
 
   return (
-    <Card className="flex flex-col">
-      <div className="border-b border-line px-4 py-3">
+    <Card className="flex flex-col overflow-hidden">
+      <div className={`h-1 ${style.bar}`} aria-hidden />
+      <div className="border-b border-line px-5 py-4">
         <div className="flex items-center justify-between">
-          <h2 className={`text-sm font-semibold ${style.accent}`}>{style.label}</h2>
-          <span className="tabular text-sm text-muted">{items.length}</span>
+          <h2 className={`text-base font-extrabold ${style.accent}`}>{style.label}</h2>
+          <span className="tabular text-sm font-semibold text-muted">{items.length}</span>
         </div>
         <p className="mt-0.5 text-xs text-muted">{style.question}</p>
       </div>
@@ -269,7 +270,7 @@ function QueueColumn({
                         )}
                       </>
                     ) : (
-                      <span className="text-violet-300">sin definir</span>
+                      <span className="text-violet-700">sin definir</span>
                     )}
                   </dd>
                 </div>

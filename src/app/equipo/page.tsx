@@ -49,7 +49,7 @@ export default async function Page({
   return (
     <div className="space-y-5">
       <header>
-        <h1 className="text-lg font-semibold">Equipo</h1>
+        <h1 className="text-2xl font-extrabold text-brand">Equipo</h1>
         <p className="mt-1 max-w-3xl text-sm text-muted">
           Carga real por persona a la fecha <span className="tabular">{asOfKey}</span>. El
           umbral de sobrecarga es el percentil 80 del propio equipo:{" "}
@@ -58,13 +58,13 @@ export default async function Page({
       </header>
 
       {topOwner && topCount >= 3 && (
-        <Card className="border-amber-500/25 bg-amber-500/5 px-4 py-3">
-          <p className="text-sm">
-            <strong className="text-amber-300">
+        <Card className="border-transparent bg-cream px-6 py-5">
+          <p className="text-base text-brand">
+            <strong className="font-extrabold">
               {topCount} de los 10 proyectos más urgentes
             </strong>{" "}
-            son de <strong>{topOwner}</strong>. El cuello de botella no es una opinión sobre
-            el reparto de carga: es el ranking mismo.
+            son de <strong className="font-extrabold">{topOwner}</strong>. El cuello de
+            botella no es una opinión sobre el reparto de carga: es el ranking mismo.
           </p>
         </Card>
       )}
@@ -74,12 +74,12 @@ export default async function Page({
         <Stat
           label="Sobrecargadas"
           value={portfolio.team.filter((m) => m.isOverloaded).length}
-          tone="text-amber-300"
+          tone="text-amber-700"
         />
         <Stat
           label="Fuera del equipo registrado"
           value={ghosts.length}
-          tone={ghosts.length > 0 ? "text-violet-300" : ""}
+          tone={ghosts.length > 0 ? "text-violet-700" : ""}
           hint={ghosts.length > 0 ? ghosts.map((g) => g.alias).join(", ") : undefined}
         />
         <Stat
@@ -103,13 +103,13 @@ export default async function Page({
                 right={
                   <div className="flex items-center gap-1.5">
                     {member.isOverloaded && (
-                      <Chip className="bg-amber-500/15 text-amber-300 ring-amber-500/30">
+                      <Chip className="bg-amber-50 text-amber-800 ring-amber-200">
                         sobrecargado
                       </Chip>
                     )}
                     {!member.inSourceTeamSheet && (
                       <Chip
-                        className="bg-violet-500/15 text-violet-300 ring-violet-500/30"
+                        className="bg-violet-50 text-violet-800 ring-violet-200"
                         title="Tiene trabajo asignado pero no aparecía en la pestaña Team del dataset"
                       >
                         fuera del equipo registrado
@@ -124,7 +124,7 @@ export default async function Page({
                   <div className="h-2 overflow-hidden rounded bg-surface-2">
                     <div
                       className={`h-full rounded ${
-                        member.isOverloaded ? "bg-amber-400" : "bg-sky-500"
+                        member.isOverloaded ? "bg-amber-500" : "bg-brand"
                       }`}
                       style={{ width: `${(member.openTasks / maxLoad) * 100}%` }}
                     />
@@ -135,17 +135,17 @@ export default async function Page({
                     <Metric
                       label="Alta o crítica"
                       value={member.highOrCriticalTasks}
-                      tone={member.highOrCriticalTasks > 15 ? "text-amber-300" : ""}
+                      tone={member.highOrCriticalTasks > 15 ? "text-amber-700" : ""}
                     />
                     <Metric
                       label="Bloqueadas"
                       value={member.blockedTasks}
-                      tone={member.blockedTasks > 0 ? "text-red-300" : ""}
+                      tone={member.blockedTasks > 0 ? "text-red-700" : ""}
                     />
                     <Metric
                       label="Vencidas"
                       value={member.overdueTasks}
-                      tone={member.overdueTasks > 0 ? "text-amber-300" : ""}
+                      tone={member.overdueTasks > 0 ? "text-amber-700" : ""}
                     />
                   </dl>
                 </div>

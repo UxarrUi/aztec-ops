@@ -1,36 +1,67 @@
 @import "tailwindcss";
 
 /*
- * Herramienta de operación: densidad de información por encima de decoración.
- * Un tema oscuro y sobrio para que el color signifique algo — rojo, ámbar y
- * verde están reservados para estado, nunca para adorno.
+ * Sistema visual tomado del sitio de Aztec (azteclab.co).
+ *
+ * Los valores no están escogidos a ojo: salen del CSS computado del sitio —
+ * fondo #f9f9f7, verde de marca #0d3326, acento #6edd62, crema #fbf2ec,
+ * tipografía Plus Jakarta Sans, píldoras de 9999px y tarjetas de 16px.
+ *
+ * Una decisión propia sobre esa base: el verde de acento de Aztec es casi el
+ * mismo verde que esta herramienta usa para "sano". Para que el color siga
+ * significando una sola cosa, el acento brillante queda reservado al ESTADO, y
+ * lo interactivo (barra superior, botones primarios) usa el verde oscuro de
+ * marca. Es una herramienta de operación: aquí el color es información.
  */
 
 :root {
-  --background: #0b0f14;
-  --surface: #121821;
-  --surface-2: #1a2230;
-  --border: #263041;
-  --foreground: #e6edf5;
-  --muted: #8b9bb0;
+  /* Neutros de Aztec */
+  --background: #f9f9f7;
+  --surface: #ffffff;
+  --surface-2: #f2f2ef;
+  --cream: #fbf2ec;
+  --border: #e5e7eb;
+  --foreground: #1d1d1d;
+  --muted: #6b7280;
+
+  /* Marca */
+  --brand: #0d3326;
+  --brand-soft: #1a4a37;
+  --accent: #6edd62;
+  --accent-soft: #eafbe7;
+  --accent-ring: #b7f0ae;
+  --accent-ink: #14532d;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-cream: var(--cream);
   --color-line: var(--border);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
-  --font-sans: var(--font-geist-sans);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ring: var(--accent-ring);
+  --color-accent-ink: var(--accent-ink);
+  --font-sans: var(--font-jakarta);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Aztec titula muy bold y muy apretado. Aquí igual, a menor escala. */
+h1,
+h2 {
+  letter-spacing: -0.02em;
 }
 
 /* Tabular para que las columnas de números no bailen entre filas. */
@@ -41,7 +72,7 @@ body {
 input,
 select,
 textarea {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 ::-webkit-scrollbar {
@@ -49,6 +80,9 @@ textarea {
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--surface-2);
+  background: #d8d8d3;
   border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c4c4be;
 }

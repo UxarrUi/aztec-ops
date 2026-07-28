@@ -15,8 +15,8 @@ import { addBlocker, addNote, createProject, setPriorityOverride, updateProject 
  */
 
 const input =
-  "w-full rounded border border-line bg-surface-2 px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted focus:border-sky-500/60 focus:outline-none";
-const labelClass = "block text-xs text-muted mb-1";
+  "w-full rounded-xl border border-line bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted focus:border-brand focus:outline-none focus:ring-2 focus:ring-accent-ring";
+const labelClass = "block text-xs font-medium text-muted mb-1.5";
 
 function Submit({ children }: { children: React.ReactNode }) {
   const { pending } = useFormStatus();
@@ -24,7 +24,7 @@ function Submit({ children }: { children: React.ReactNode }) {
     <button
       type="submit"
       disabled={pending}
-      className="rounded bg-sky-500/20 px-3 py-1.5 text-sm text-sky-200 ring-1 ring-inset ring-sky-500/30 transition-colors hover:bg-sky-500/30 disabled:opacity-50"
+      className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-soft disabled:opacity-50"
     >
       {pending ? "Guardando…" : children}
     </button>
@@ -34,9 +34,9 @@ function Submit({ children }: { children: React.ReactNode }) {
 function Feedback({ state }: { state: ActionResult | null }) {
   if (!state) return null;
   if (state.ok) {
-    return <p className="text-xs text-emerald-300">Guardado.</p>;
+    return <p className="text-xs font-medium text-accent-ink">Guardado.</p>;
   }
-  return <p className="text-xs text-red-300">{state.error}</p>;
+  return <p className="text-xs text-red-700">{state.error}</p>;
 }
 
 function Field({
