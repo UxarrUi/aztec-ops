@@ -155,7 +155,8 @@ El enunciado pide decir esto explícitamente. Cada decisión tiene su razón:
 | Fuera | Por qué |
 |---|---|
 | **Autenticación y usuarios** | El reto pide un prototipo de gestión de proyectos, no un control de acceso. Las acciones se registran con un actor genérico (`Operación`); el modelo de datos ya guarda quién hizo cada cambio, así que añadir sesiones es cambiar de dónde sale ese nombre, no rediseñar nada |
-| **CRUD de tareas desde la interfaz** | Las tareas se leen y se analizan, pero se editan solo desde el seed. El grafo de dependencias es lo que da valor —derivar el siguiente paso, detectar ciclos— y eso ya está. Un formulario de tareas habría consumido el tiempo que fue a los tests del criterio |
+| **Crear, borrar y reasignar tareas** | Sobre las tareas sólo se puede cambiar el **estado** y **romper una dependencia** — las dos operaciones que el propio sistema exige para poder actuar sobre lo que detecta. Crear una tarea, borrarla o cambiarle responsable, prioridad o fecha no aporta nada al criterio, que es lo que se está evaluando |
+| **Resolver un bloqueo desde la interfaz** | La acción existe (`resolveBlocker` en `src/lib/actions.ts`) pero no tiene botón: se puede registrar un bloqueo y no cerrarlo. Es una omisión consciente por tiempo, no un descuido silencioso — queda anotada aquí para que se pueda comprobar |
 | **API de escritura** | Duplicaría las validaciones y el registro en historial que ya viven en las server actions. Dos caminos de escritura terminan divergiendo |
 | **Notificaciones y alertas** | El sistema detecta lo que está en riesgo; enviarlo por Slack o correo es plomería sobre una decisión ya tomada, y no demuestra criterio |
 | **Gráficas** | La carga del equipo se muestra con barras simples. Una librería de gráficas habría sumado peso sin responder ninguna pregunta que la tabla no responda |

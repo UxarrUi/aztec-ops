@@ -7,8 +7,8 @@ import type { ProjectLike, QueueName } from "./types";
  * El enrutamiento a colas — la segunda dimensión del criterio, y la que de
  * verdad hace útil al sistema.
  *
- * Con 19 de 22 proyectos en rojo, ordenar una sola lista por urgencia no ayuda:
- * el lunes sigues viendo 19 rojos. Lo que cambia la conversación es separar por
+ * Con 18 de 22 proyectos en rojo, ordenar una sola lista por urgencia no ayuda:
+ * el lunes sigues viendo 18 rojos. Lo que cambia la conversación es separar por
  * TIPO DE ACCIÓN, porque cada tipo lo resuelve una persona distinta con una
  * herramienta distinta:
  *

@@ -11,6 +11,7 @@ import {
   ProjectForm,
 } from "@/components/forms";
 import { NextStepDraft } from "@/components/ai";
+import { BreakDependencyButton, TaskStatusSelect } from "@/components/TaskControls";
 import {
   Card,
   Chip,
@@ -178,29 +179,38 @@ export default async function Page({
                             <span className="tabular">{formatDate(task.dueDate)}</span>
                           </p>
                           {dependency && (
-                            <p className="mt-0.5 text-xs text-muted">
-                              depende de{" "}
-                              <span className="font-mono">{dependency.code}</span>{" "}
-                              ({dependency.status})
+                            <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted">
+                              <span>
+                                depende de{" "}
+                                <span className="font-mono">{dependency.code}</span>{" "}
+                                ({dependency.status})
+                              </span>
+                              <BreakDependencyButton
+                                taskCode={task.code}
+                                dependsOnCode={dependency.code}
+                              />
                             </p>
                           )}
                         </div>
-                        <div className="flex shrink-0 flex-col items-end gap-1">
-                          {startable && (
-                            <Chip className="bg-accent-soft text-accent-ink ring-accent-ring">
-                              arrancable
-                            </Chip>
-                          )}
-                          {inCycle && (
-                            <Chip className="bg-violet-50 text-violet-800 ring-violet-200">
-                              en ciclo
-                            </Chip>
-                          )}
-                          {overdue && (
-                            <Chip className="bg-amber-50 text-amber-800 ring-amber-200">
-                              vencida
-                            </Chip>
-                          )}
+                        <div className="flex shrink-0 flex-col items-end gap-1.5">
+                          <TaskStatusSelect taskCode={task.code} status={task.status} />
+                          <div className="flex flex-wrap justify-end gap-1">
+                            {startable && (
+                              <Chip className="bg-accent-soft text-accent-ink ring-accent-ring">
+                                arrancable
+                              </Chip>
+                            )}
+                            {inCycle && (
+                              <Chip className="bg-violet-50 text-violet-800 ring-violet-200">
+                                en ciclo
+                              </Chip>
+                            )}
+                            {overdue && (
+                              <Chip className="bg-amber-50 text-amber-800 ring-amber-200">
+                                vencida
+                              </Chip>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </li>

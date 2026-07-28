@@ -215,6 +215,60 @@ describe("capacidad del equipo", () => {
   });
 });
 
+/**
+ * Estas dos operaciones existen en la interfaz (cambiar el estado de una tarea y
+ * romper una dependencia). Los tests las ejercitan sobre el dominio puro: si el
+ * grafo dejara de recalcularse, la aplicación seguiría "funcionando" pero
+ * mostraría un siguiente paso mentiroso, que es el peor fallo posible aquí.
+ */
+describe("cerrar una tarea hace avanzar el siguiente paso", () => {
+  it("al cerrar PRJ-04-T01, el siguiente paso pasa a la tarea que dependía de ella", () => {
+    const mutados = projects.map((p) =>
+      p.code !== "PRJ-04"
+        ? p
+        : {
+            ...p,
+            tasks: p.tasks.map((t) =>
+              t.code === "PRJ-04-T01" ? { ...t, status: "Hecha" as const } : t,
+            ),
+          },
+    );
+
+    const despues = analyzePortfolio(mutados, team, asOf);
+    const prj04 = despues.projects.find((p) => p.project.code === "PRJ-04")!;
+
+    // Antes el siguiente paso era T01; ahora T01 está cerrada y desbloquea a T04.
+    expect(byCode("PRJ-04").nextStep!.taskCode).toBe("PRJ-04-T01");
+    expect(prj04.nextStep!.taskCode).toBe("PRJ-04-T04");
+  });
+});
+
+describe("romper el ciclo saca a PRJ-04 de la cola DECIDIR", () => {
+  it("al quitar la dependencia de T03, desaparece el ciclo y el proyecto pasa a ESCALAR", () => {
+    const mutados = projects.map((p) =>
+      p.code !== "PRJ-04"
+        ? p
+        : {
+            ...p,
+            tasks: p.tasks.map((t) =>
+              t.code === "PRJ-04-T03" ? { ...t, dependsOnCode: null } : t,
+            ),
+          },
+    );
+
+    const despues = analyzePortfolio(mutados, team, asOf);
+    const prj04 = despues.projects.find((p) => p.project.code === "PRJ-04")!;
+
+    expect(byCode("PRJ-04").cycles).toHaveLength(1);
+    expect(byCode("PRJ-04").queue).toBe("DECIDIR");
+
+    expect(prj04.cycles).toHaveLength(0);
+    expect(prj04.flags.some((f) => f.code === "DEPENDENCIA_CIRCULAR")).toBe(false);
+    // Resuelto el problema interno, lo que queda es el bloqueo del cliente.
+    expect(prj04.queue).toBe("ESCALAR");
+  });
+});
+
 describe("la fecha de corte cambia el resultado", () => {
   // Es la razón de que la fecha sea configurable. Al alejarse del snapshot, el
   // backlog entero cae en mora y el factor de riesgo se satura: todo el mundo

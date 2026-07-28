@@ -328,6 +328,97 @@ export async function resolveBlocker(
   return { ok: true };
 }
 
+const VALID_TASK_STATUS = [
+  "Por hacer",
+  "En progreso",
+  "En revision",
+  "Bloqueada",
+  "Hecha",
+];
+
+/**
+ * Cambia el estado de una tarea.
+ *
+ * Es la acción que mantiene vivo el grafo: al cerrar una tarea, la que dependía
+ * de ella pasa a ser arrancable y el siguiente paso del proyecto se recalcula
+ * solo. Nada de eso se guarda — se deduce en la siguiente lectura.
+ */
+export async function updateTaskStatus(
+  taskCode: string,
+  status: string,
+): Promise<ActionResult> {
+  if (!VALID_TASK_STATUS.includes(status)) {
+    return { ok: false, error: `Estado de tarea no válido: ${status}.` };
+  }
+
+  const task = await prisma.task.findUnique({
+    where: { code: taskCode },
+    include: { project: { select: { id: true, code: true } } },
+  });
+  if (!task) return { ok: false, error: `No existe la tarea ${taskCode}.` };
+  if (task.status === status) return { ok: true };
+
+  await prisma.task.update({ where: { code: taskCode }, data: { status } });
+  await prisma.activityLog.create({
+    data: {
+      projectId: task.project.id,
+      actor: DEFAULT_ACTOR,
+      action: "TASK",
+      field: `estado de ${taskCode}`,
+      oldValue: task.status,
+      newValue: status,
+    },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/proyectos");
+  revalidatePath(`/proyectos/${task.project.code}`);
+  return { ok: true };
+}
+
+/**
+ * Quita la dependencia de una tarea.
+ *
+ * Existe por un caso concreto del dataset: PRJ-04 tiene un ciclo entre T02 y
+ * T03, y el sistema dice que hay que decidir cuál de las dos arranca primero.
+ * Sin esta acción, esa decisión no se podría ejecutar en la aplicación — el
+ * sistema detectaría un problema que no deja arreglar.
+ */
+export async function breakTaskDependency(taskCode: string): Promise<ActionResult> {
+  const task = await prisma.task.findUnique({
+    where: { code: taskCode },
+    include: {
+      project: { select: { id: true, code: true } },
+      dependsOn: { select: { code: true } },
+    },
+  });
+  if (!task) return { ok: false, error: `No existe la tarea ${taskCode}.` };
+  if (!task.dependsOnTaskId) {
+    return { ok: false, error: `${taskCode} no depende de ninguna tarea.` };
+  }
+
+  await prisma.task.update({
+    where: { code: taskCode },
+    data: { dependsOnTaskId: null },
+  });
+  await prisma.activityLog.create({
+    data: {
+      projectId: task.project.id,
+      actor: DEFAULT_ACTOR,
+      action: "TASK",
+      field: `dependencia de ${taskCode}`,
+      oldValue: task.dependsOn?.code ?? "—",
+      newValue: null,
+      reason: "Se rompe la dependencia para desbloquear la cadena.",
+    },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/proyectos");
+  revalidatePath(`/proyectos/${task.project.code}`);
+  return { ok: true };
+}
+
 /**
  * Crea un proyecto.
  *
