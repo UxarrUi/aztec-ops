@@ -349,7 +349,7 @@ export function BlockerForm({
     <form action={action} className="space-y-3 px-4 py-3">
       <Field
         label="Descripción del bloqueo"
-        hint="Si no eliges tipo, el sistema lo clasifica leyendo el texto."
+        hint="Si no eliges tipo, el sistema lo propone leyendo el texto — revísalo: de eso depende que el proyecto vaya a Escalar o a Ejecutar."
       >
         <textarea
           name="description"

@@ -25,9 +25,24 @@ export interface RuleContext {
   knownMembers: Set<string>;
 }
 
-/** Un bloqueo es externo si su texto habla de terceros: cliente, accesos, API. */
+/**
+ * Un bloqueo es externo si su texto nombra a un tercero o a un trámite suyo:
+ * cliente, proveedor, accesos, aprobaciones.
+ *
+ * Es una heurística sobre palabras, no una verdad: acierta con los textos del
+ * dataset y con lo que la gente suele escribir, pero puede equivocarse con una
+ * redacción libre. Por eso el formulario deja elegir el tipo a mano — la
+ * detección es una propuesta, no una decisión. Y es deliberado que sea
+ * determinista y no un modelo: de esta clasificación depende a qué cola va el
+ * proyecto, y eso tiene que ser reproducible.
+ */
 export function classifyBlockerText(text: string): BlockerKind {
-  const normalized = text.toLowerCase();
+  // Sin acentos, para que "aprobación" y "aprobacion" se traten igual.
+  const normalized = text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
+
   return EXTERNAL_BLOCKER_PATTERNS.some((p) => normalized.includes(p))
     ? "EXTERNO"
     : "INTERNO";

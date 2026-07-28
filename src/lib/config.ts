@@ -102,14 +102,23 @@ export const EXTERNAL_BLOCKER_PATTERNS = [
   "owner confirmation",
   "pending access",
   "vendor",
-  // equivalentes en español, para proyectos creados desde la aplicación
-  "espera del cliente",
-  "respuesta del cliente",
+  // Equivalentes en español, para bloqueos escritos a mano en la aplicación.
+  // El criterio para incluir un patrón es que nombre a un tercero o a un
+  // trámite suyo: si el texto solo describe trabajo técnico, debe quedar
+  // INTERNO. Ver los casos negativos en tests/rules.test.ts.
+  "del cliente",
+  "al cliente",
+  "proveedor",
   "credenciales",
   "accesos",
   "permisos",
   "dependencia externa",
-  "proveedor",
+  "area legal",
+  "juridico",
+  "nda",
+  "aprobacion",
+  "autorizacion",
+  "firma del",
 ] as const;
 
 /** Estados de tarea que cuentan como cerradas. */
