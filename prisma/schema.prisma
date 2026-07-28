@@ -16,7 +16,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 /// Persona del equipo. `inSourceTeamSheet` marca si aparecía en la pestaña

@@ -1,17 +1,23 @@
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
 
 /**
  * Cliente de Prisma único.
  *
- * En desarrollo, Next recarga los módulos en caliente y sin este cacheo en
- * `globalThis` se abriría una conexión nueva a SQLite en cada recarga.
+ * En desarrollo Next recarga los módulos en caliente; sin este cacheo en
+ * `globalThis` se abriría un pool de conexiones nuevo en cada recarga y la base
+ * acabaría rechazando conexiones.
  */
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createClient(): PrismaClient {
-  const url = process.env.DATABASE_URL ?? "file:./prisma/dev.db";
-  return new PrismaClient({ adapter: new PrismaBetterSqlite3({ url }) });
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error(
+      "Falta DATABASE_URL. Copia .env.example a .env y pon la cadena de conexión.",
+    );
+  }
+  return new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 }
 
 export const prisma: PrismaClient = globalForPrisma.prisma ?? createClient();
