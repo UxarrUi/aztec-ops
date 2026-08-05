@@ -19,25 +19,31 @@ los hallazgos del dataset con su evidencia, y por qué el criterio es el que es.
 
 ## Cómo levantarlo
 
-Requiere Node 20 o superior. No hay base de datos que instalar: SQLite en archivo.
+Requiere Node 20 o superior y una base de datos PostgreSQL.
 
 ```bash
+cp .env.example .env   # y pon ahí tu DATABASE_URL
 npm install
-npm run setup     # migra la base y carga el dataset
-npm run dev       # http://localhost:3000
+npm run setup          # migra la base y carga el dataset
+npm run dev            # http://localhost:3000
 ```
 
-Eso es todo. No hace falta configurar variables de entorno ni claves de API — la
-aplicación funciona completa sin ellas (ver *La IA redacta, no decide*).
+`DATABASE_URL` es la única variable obligatoria: la cadena de conexión de tu
+PostgreSQL. Sirve cualquiera — uno local, o uno gestionado como Neon o Supabase,
+que dan una base gratis en un par de minutos. La clave de IA es **opcional**: sin
+ella la aplicación funciona completa (ver *La IA redacta, no decide*).
 
 **Otros comandos:**
 
 ```bash
-npm test              # 65 tests del criterio, sobre el dataset real
+npm test              # 80 tests del criterio, sobre el dataset real
 npm run ranking       # imprime el portafolio priorizado en la terminal
 npm run ranking 2026-07-27   # recalculado a otra fecha de corte
-npm run db:reset      # vuelve al estado inicial del dataset
+npm run db:reset      # borra la base y recarga el dataset original
 ```
+
+`npm run ranking` y `npm test` leen el CSV directamente: corren sin base de datos
+y sin conexión.
 
 ---
 
@@ -90,7 +96,7 @@ qué. Un número sin justificación no sirve para discutir prioridades con un eq
 
 ## Cómo está construido
 
-Next.js + TypeScript + Prisma + SQLite + Tailwind.
+Next.js + TypeScript + Prisma + PostgreSQL + Tailwind.
 
 ```
 src/lib/          ← EL NÚCLEO: código puro, sin React ni Next
@@ -102,7 +108,7 @@ src/lib/          ← EL NÚCLEO: código puro, sin React ni Next
   dataset.ts      normalización del CSV original
   ai.ts           redacción asistida, con fallback determinista
 src/app/          las 5 vistas y la API
-tests/            65 tests sobre el dataset real
+tests/            80 tests sobre el dataset real
 scripts/ranking.ts   el mismo criterio, en la terminal
 ```
 
@@ -177,4 +183,4 @@ qué proyectos se mueven.
 | [`ANALISIS.md`](./ANALISIS.md) | El razonamiento completo: el problema, la tesis, los hallazgos y el ranking calculado |
 | [`PRIORIZACION.md`](./PRIORIZACION.md) | El criterio en detalle, con el cálculo de tres proyectos hecho a mano |
 | [`HALLAZGOS.md`](./HALLAZGOS.md) | Las anomalías del dataset, con evidencia e implicación operativa |
-| `data/*.csv` | Copia del dataset original — el repositorio funciona sin conexión |
+| `data/*.csv` | Copia del dataset original — viaja con el repositorio, no hay que descargarlo |

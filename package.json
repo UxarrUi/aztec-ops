@@ -10,6 +10,7 @@
     "test": "vitest run",
     "seed": "tsx prisma/seed.ts",
     "setup": "prisma migrate deploy && prisma generate && tsx prisma/seed.ts",
+    "db:reset": "tsx prisma/seed.ts",
     "ranking": "tsx scripts/ranking.ts",
     "postinstall": "prisma generate"
   },

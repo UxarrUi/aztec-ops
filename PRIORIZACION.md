@@ -241,7 +241,7 @@ envejecería mal en cuanto el equipo crezca.
 
 ## Cómo se verifica que el criterio es reproducible
 
-`npm test` corre 65 tests. Los que importan no prueban funciones aisladas:
+`npm test` corre 80 tests. Los que importan no prueban funciones aisladas:
 **corren el motor completo sobre el dataset real y fijan cada afirmación de este
 documento** — el ciclo de PRJ-04, el zombie PRJ-21, el duplicado PRJ-08/22, la
 salud recalculada de los cuatro diagnósticos, el reparto de las tres colas, la

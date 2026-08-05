@@ -43,8 +43,8 @@ next-env.d.ts
 
 /src/generated/prisma
 
-# base de datos local (se regenera con `npm run setup`)
-
+# restos de la etapa SQLite — la base ahora es PostgreSQL
+*.db
 *.db-journal
 
 # material de grabación del video — no se publica
