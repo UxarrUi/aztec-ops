@@ -12,6 +12,9 @@ dice qué hacer con cada frente.
 > urgentes, solo uno se puede trabajar hoy** — seis dependen de un tercero y tres
 > necesitan una decisión. Eso no se ve ordenando por urgencia.
 
+**▸ Aplicación en vivo: [reto-aztec.vercel.app](https://reto-aztec.vercel.app)** —
+el portafolio priorizado, sin instalar nada.
+
 **El razonamiento completo está en [`ANALISIS.md`](./ANALISIS.md)** — el problema,
 los hallazgos del dataset con su evidencia, y por qué el criterio es el que es.
 
@@ -63,6 +66,12 @@ También hay una API de lectura:
 curl 'localhost:3000/api/portfolio' | jq '.queues.ESCALAR[].code'
 curl 'localhost:3000/api/projects?queue=DECIDIR&owner=Camila%20Torres'
 curl 'localhost:3000/api/portfolio?asOf=2026-07-27' | jq '.totals'
+```
+
+También responde en el despliegue, sin levantar nada:
+
+```bash
+curl 'https://reto-aztec.vercel.app/api/portfolio' | jq '.totals'
 ```
 
 Es de solo lectura a propósito: la escritura pasa por *server actions*, que es
